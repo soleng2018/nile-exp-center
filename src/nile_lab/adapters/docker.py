@@ -9,6 +9,9 @@ import subprocess
 from nile_lab.model import Container, DockerNetwork
 
 
+TIMEOUT = 30  # seconds; a hung daemon must not hang plan
+
+
 class DockerError(Exception):
     pass
 
@@ -19,21 +22,30 @@ def available() -> bool:
 
 def _run(*args: str) -> str:
     try:
-        res = subprocess.run(["docker", *args], capture_output=True, text=True, check=True)
+        res = subprocess.run(["docker", *args], capture_output=True, text=True, check=True, timeout=TIMEOUT)
     except subprocess.CalledProcessError as e:
         raise DockerError(f"docker {args[0]} failed: {e.stderr.strip()}") from None
+    except subprocess.TimeoutExpired:
+        raise DockerError(f"docker {args[0]} timed out after {TIMEOUT}s (is the daemon stuck?)") from None
+    except OSError as e:
+        raise DockerError(f"docker {args[0]} could not run: {e.strerror}") from None
     return res.stdout
 
 
 def _labels(raw: str | dict | None) -> dict[str, str]:
     # `docker ps --format json` gives "k=v,k=v"; inspect gives a dict.
+    # A piece with no "=" is a comma inside the previous value, so glue it back on.
     if isinstance(raw, dict):
         return raw
-    out = {}
-    for pair in (raw or "").split(","):
-        k, sep, v = pair.partition("=")
+    out: dict[str, str] = {}
+    last = None
+    for piece in (raw or "").split(","):
+        k, sep, v = piece.partition("=")
         if sep:
             out[k] = v
+            last = k
+        elif last is not None:
+            out[last] += f",{piece}"
     return out
 
 

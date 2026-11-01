@@ -8,10 +8,12 @@ from nile_lab.model import ActualState
 
 def observe() -> ActualState:
     have_docker = docker.available()
+    routes = host.read_routes()
     return ActualState(
         interfaces=host.read_interfaces(),
         usb_devices=host.read_usb_devices(),
-        host_routes=host.read_routes(),
+        host_routes=routes or (),
+        host_routes_read=routes is not None,
         unit_files=host.read_unit_files(),
         docker_available=have_docker,
         containers=docker.list_containers() if have_docker else (),

@@ -14,6 +14,7 @@ import typer
 from nile_lab import config as cfgmod
 from nile_lab import observe as obs
 from nile_lab import planner
+from nile_lab.adapters.docker import DockerError
 from nile_lab.model import ActionKind, Plan
 
 EXIT_OK, EXIT_ERROR, EXIT_INVALID, EXIT_PENDING = 0, 1, 2, 3
@@ -72,7 +73,12 @@ def plan(
     """Show what apply would change. Reads only; changes nothing."""
     _require_root()
     cfg = _load(config)
-    result = planner.plan(cfg, obs.observe(), offline=offline)
+    try:
+        actual = obs.observe()
+    except DockerError as e:
+        typer.echo(f"error: {e}", err=True)
+        raise typer.Exit(EXIT_ERROR) from None
+    result = planner.plan(cfg, actual, offline=offline)
     typer.echo(plan_json(result) if as_json else plan_text(cfg, result), nl=not as_json)
     if result.refusals:
         raise typer.Exit(EXIT_INVALID)

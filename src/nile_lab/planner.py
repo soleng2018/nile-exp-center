@@ -94,6 +94,8 @@ def _docker(cfg: LabConfig, actual: ActualState, foreign: list[Foreign], refusal
 
     existing = nets.get(MGMT_NETWORK)
     own_subnet = existing is not None and existing.owned and subnet in existing.subnets
+    if not actual.host_routes_read:
+        refusals.append(f"could not read host routes, so mgmt_network.subnet {subnet} can't be checked for overlap")
     for route in actual.host_routes:
         if own_subnet and route == subnet:
             continue  # the route of our own bridge
@@ -146,12 +148,16 @@ def _docker(cfg: LabConfig, actual: ActualState, foreign: list[Foreign], refusal
 
 def _clients(cfg: LabConfig, actual: ActualState, foreign: list[Foreign]) -> Phase:
     phase = Phase("clients")
+    # Join on our client label first: compose names containers <project>-<service>-<n>.
+    by_label = {c.labels[LABEL_CLIENT]: c for c in actual.containers if c.owned and LABEL_CLIENT in c.labels}
     by_name = {c.name: c for c in actual.containers}
-    configured = {project_name(c.name) for c in cfg.clients}
+    matched: set[int] = set()
 
     for client in cfg.clients:
         name = project_name(client.name)
-        container = by_name.get(name)
+        container = by_label.get(client.name) or by_name.get(name)
+        if container is not None:
+            matched.add(id(container))
         if container is not None and not container.owned:
             foreign.append(Foreign("container", name))
             phase.actions.append(
@@ -166,7 +172,7 @@ def _clients(cfg: LabConfig, actual: ActualState, foreign: list[Foreign]) -> Pha
         phase.actions.append(_client_action(client.name, container, res, detail, problems))
 
     for c in actual.containers:
-        if c.name in configured:
+        if id(c) in matched:
             continue
         if c.owned:
             phase.actions.append(Action(ActionKind.ORPHAN, "client", c.labels.get(LABEL_CLIENT, c.name),

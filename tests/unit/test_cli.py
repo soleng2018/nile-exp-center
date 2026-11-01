@@ -47,6 +47,24 @@ class TestPlan:
         assert res.exit_code == 2
         assert "overlaps host route 172.30.0.0/16" in res.output
 
+    def test_unreadable_routes_are_refused(self, fake_observe):
+        fake_observe.state = replace(fake_observe.state, host_routes=(), host_routes_read=False)
+        res = run("plan", "--offline", "-c", str(SAMPLE))
+        assert res.exit_code == 2
+        assert "could not read host routes" in res.output
+
+    def test_docker_failure_is_one_line_and_exits_1(self, monkeypatch):
+        from nile_lab.adapters.docker import DockerError
+
+        def boom():
+            raise DockerError("docker ps failed: Cannot connect to the Docker daemon")
+
+        monkeypatch.setattr("nile_lab.observe.observe", boom)
+        res = run("plan", "--offline", "-c", str(SAMPLE))
+        assert res.exit_code == 1
+        assert "error: docker ps failed: Cannot connect" in res.output
+        assert "Traceback" not in res.output
+
     def test_config_from_env(self, monkeypatch):
         monkeypatch.setenv("NILE_LAB_CONFIG", str(SAMPLE))
         assert run("plan", "--offline").exit_code == 0

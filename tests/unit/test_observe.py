@@ -53,3 +53,10 @@ def test_observe_only_runs_read_commands(empty_host, monkeypatch):
     monkeypatch.setattr("shutil.which", lambda name: f"/usr/bin/{name}")
     observe.observe()
     assert {tuple(cmd[:3]) for cmd in empty_host} <= READ_COMMANDS
+
+
+def test_failed_route_read_is_flagged(empty_host, monkeypatch):
+    monkeypatch.setattr("shutil.which", lambda name: None)
+    monkeypatch.setattr(host, "read_routes", lambda: None)
+    state = observe.observe()
+    assert state.host_routes == () and not state.host_routes_read

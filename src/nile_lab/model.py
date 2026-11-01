@@ -99,6 +99,7 @@ class ActualState:
     interfaces: tuple[NetInterface, ...] = ()
     usb_devices: tuple[UsbDevice, ...] = ()
     host_routes: tuple[str, ...] = ()  # destination CIDRs, e.g. "10.1.255.0/24"
+    host_routes_read: bool = True  # False when `ip route` failed, so overlap can't be checked
     unit_files: tuple[UnitFile, ...] = ()
     docker_available: bool = False
     containers: tuple[Container, ...] = ()

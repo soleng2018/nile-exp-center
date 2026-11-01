@@ -57,7 +57,7 @@ def test_lists_containers_with_state_and_parsed_labels(fake_cli):
 def test_label_values_may_contain_equals_signs(fake_cli):
     fake_cli({"ps -a": json_lines({"Names": "nile-x", "State": "running", "Labels": "a=b=c,junk,d="})})
     (c,) = docker.list_containers()
-    assert c.labels == {"a": "b=c", "d": ""}
+    assert c.labels == {"a": "b=c,junk", "d": ""}
 
 
 def test_only_lists_nile_containers(fake_cli):
@@ -90,4 +90,23 @@ def test_no_nile_networks_skips_inspect(fake_cli):
 def test_cli_failure_raises_docker_error_with_stderr(fake_cli):
     fake_cli()
     with pytest.raises(docker.DockerError, match=r"^docker ps failed: Error: no such thing$"):
+        docker.list_containers()
+
+
+def test_label_values_may_contain_commas(fake_cli):
+    row = {"Names": "nile-win01", "State": "running", "Labels": "a=1,2,b=x=y,c=3"}
+    fake_cli({"ps -a": json_lines(row)})
+    assert docker.list_containers()[0].labels == {"a": "1,2", "b": "x=y", "c": "3"}
+
+
+@pytest.mark.parametrize("exc, msg", [
+    (subprocess.TimeoutExpired(["docker"], 30), r"^docker ps timed out after 30s"),
+    (FileNotFoundError(2, "No such file or directory"), r"^docker ps could not run: No such file or directory$"),
+])
+def test_timeouts_and_missing_binary_raise_docker_error(monkeypatch, exc, msg):
+    def run(cmd, **kwargs):
+        raise exc
+
+    monkeypatch.setattr("nile_lab.adapters.docker.subprocess.run", run)
+    with pytest.raises(docker.DockerError, match=msg):
         docker.list_containers()

@@ -238,7 +238,7 @@ During development you can run `sudo uv run nile-lab ...` straight from this rep
 - [ ] Feature 9 (macOS): **risk**. `dockur/macos` documents no unattended first boot script mechanism, so setup likely runs over SSH after install. Browser rendered **VNC** for Access was not confirmed in the docs (browser RDP was). Verify both before designing.
 - [ ] Feature 8 (delta): decide how a changed software list reaches an already installed VM.
 - [ ] Feature 10 (monitoring): pick the udev event source (for example `pyudev` vs `udevadm monitor`) and the retry and backoff policy.
-- [ ] Project is not a git repo yet; run `git init` before scaffolding so `/opt/nile-lab` can deploy from a checkout.
+- [x] Project is not a git repo yet; run `git init` before scaffolding so `/opt/nile-lab` can deploy from a checkout.
 - [ ] `/audit` (feature 2) should capture this stack in root `AGENTS.md` (`/sync` keeps it current).
 - [ ] Install the chosen Agent Skills once Node and `npx` are on the host (not installed today; found through web mirrors, so confirm each with `npx skills add <owner>/<repo> --list` first): `systemd-services` (`bagelhole/devops-security-agent-skills`), `cloudflare-zero-trust` (`bagelhole/devops-security-agent-skills`), `python-testing-patterns` (`wshobson/agents`), `docker-development-skill` (`netresearch/docker-development-skill`). Record each in root `AGENTS.md` `## Agent skills`, except `cloudflare-zero-trust`, which belongs in the Cloudflare adapter area's nested `AGENTS.md`.
 - [ ] Connect the official Cloudflare MCP server (verify `github.com/cloudflare/mcp-server-cloudflare` first) with `claude mcp add`, ideally with a token that is read only for `nova`, before building feature 6. Record it on the `MCP servers:` line of `AGENTS.md`.

@@ -73,9 +73,9 @@ def test_routes_keep_unicast_destinations_only(monkeypatch):
     assert host.read_routes() == ("10.1.255.0/24", "192.168.9.9/32")
 
 
-def test_routes_are_empty_when_ip_fails(monkeypatch):
+def test_routes_are_none_when_ip_fails(monkeypatch):
     fake_ip(monkeypatch, fail=True)
-    assert host.read_routes() == ()
+    assert host.read_routes() is None
 
 
 def test_missing_sysfs_and_unit_dirs_read_as_empty(tmp_path):
@@ -108,3 +108,17 @@ def test_empty_unit_file_is_not_managed(tmp_path):
     (tmp_path / "nile-lab-boot.service").write_text("")
     (tmp_path / "nile-lab-monitor.service").write_text(f"[Unit]\n{MANAGED_HEADER}\n")
     assert all(not u.managed for u in host.read_unit_files(tmp_path))
+
+
+def test_routes_are_none_when_ip_prints_garbage(monkeypatch):
+    import subprocess
+
+    monkeypatch.setattr("nile_lab.adapters.host.subprocess.run",
+                        lambda cmd, **kw: subprocess.CompletedProcess(cmd, 0, "not json", ""))
+    assert host.read_routes() is None
+
+
+def test_unit_drop_in_dirs_are_skipped(tmp_path):
+    (tmp_path / "nile-lab-boot.service").write_text(f"{MANAGED_HEADER}\n")
+    (tmp_path / "nile-lab-boot.service.d").mkdir()
+    assert [u.name for u in host.read_unit_files(tmp_path)] == ["nile-lab-boot.service"]

@@ -58,13 +58,16 @@ def read_usb_devices(usb_dir: Path = USB_DIR) -> tuple[UsbDevice, ...]:
     return tuple(out)
 
 
-def read_routes() -> tuple[str, ...]:
+def read_routes() -> tuple[str, ...] | None:
+    """Destination CIDRs, or None when the routes could not be read (never fail open)."""
     try:
-        res = subprocess.run(["ip", "-j", "route", "show", "table", "all"], capture_output=True, text=True, check=True)
-    except (OSError, subprocess.CalledProcessError):
-        return ()
+        res = subprocess.run(["ip", "-j", "route", "show", "table", "all"], capture_output=True, text=True,
+                             check=True, timeout=10)
+        rows = json.loads(res.stdout or "[]")
+    except (OSError, subprocess.SubprocessError, json.JSONDecodeError):
+        return None
     routes = []
-    for r in json.loads(res.stdout or "[]"):
+    for r in rows:
         dst = r.get("dst", "")
         if dst and dst != "default" and r.get("type", "unicast") == "unicast":
             routes.append(dst if "/" in dst else f"{dst}/32")
@@ -74,6 +77,8 @@ def read_routes() -> tuple[str, ...]:
 def read_unit_files(unit_dir: Path = UNIT_DIR) -> tuple[UnitFile, ...]:
     out = []
     for f in sorted(unit_dir.glob("nile-lab-*")) if unit_dir.exists() else []:
+        if not f.is_file():
+            continue  # drop-in dirs like nile-lab-boot.service.d are not units
         head = (_read(f) or "").splitlines()[:1]
         out.append(UnitFile(f.name, head == [MANAGED_HEADER]))
     return tuple(out)

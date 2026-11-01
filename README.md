@@ -78,7 +78,7 @@ uv run pytest
 
 ## Exit codes
 
-`0` ok · `1` runtime error · `2` invalid config or refused precondition (not root, subnet overlap) · `3` changes pending (only with `plan --detailed-exitcode`).
+`0` ok · `1` runtime error (for example Docker not responding) · `2` invalid config or refused precondition (not root, subnet overlap, host routes could not be read) · `3` changes pending (only with `plan --detailed-exitcode`).
 
 ## More
 

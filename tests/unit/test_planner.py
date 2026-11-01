@@ -220,3 +220,18 @@ def test_phases_come_in_contract_order(sample_cfg):
 
 def test_plan_is_deterministic(sample_cfg):
     assert plan(sample_cfg, converged(), offline=True) == plan(sample_cfg, converged(), offline=True)
+
+
+def test_compose_named_container_is_joined_by_client_label(sample_cfg):
+    state = converged()
+    win = state.containers[0]
+    state = replace(state, containers=(replace(win, name="nile-win01-windows-1"), state.containers[1]))
+    p = plan(sample_cfg, state, offline=True)
+    assert set(kinds(p).values()) == {ActionKind.NOOP}
+    assert not p.foreign
+
+
+def test_unreadable_routes_refuse_instead_of_failing_open(sample_cfg):
+    state = replace(converged(), host_routes=(), host_routes_read=False)
+    p = plan(sample_cfg, state, offline=True)
+    assert any("could not read host routes" in r for r in p.refusals)
