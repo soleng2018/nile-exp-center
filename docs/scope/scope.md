@@ -13,7 +13,7 @@ What we know about the server today: Ubuntu 26.04, 64 cores, 121 GB RAM, KVM ava
 
 | # | Feature | Phase | Status |
 |---|---------|-------|--------|
-| 1 | Stack & architecture | Foundation | in-progress |
+| 1 | Stack & architecture | Foundation | done |
 | 2 | Coding standards & tooling | Foundation | planned |
 | 3 | Config & secrets file | Foundation | planned |
 | 4 | Host bootstrap | Foundation | planned |
@@ -26,7 +26,7 @@ What we know about the server today: Ubuntu 26.04, 64 cores, 121 GB RAM, KVM ava
 
 ## Foundations
 
-### 1. Stack & architecture · in-progress
+### 1. Stack & architecture · done
 Decide what the scripts are written in, how the pieces fit (setup, reconcile, startup scripts, monitor), and how the run applies only the difference between the config and what is running. Then scaffold a runnable project.
 **Done when:** the choices are recorded in a spec, and a scaffolded entry script runs on this server and prints what it would do from a sample config.
 spec [0001](../specs/0001-stack-architecture/index.md) · code in [src/nile_lab/](../../src/nile_lab/)
@@ -35,7 +35,7 @@ spec [0001](../specs/0001-stack-architecture/index.md) · code in [src/nile_lab/
 - [x] Verify it: `/check verify stack & architecture`
 - [x] Test it: `/test stack & architecture`
 - [x] Review it (fresh model): `/check review stack & architecture`
-- [ ] Document it: `/document stack & architecture`
+- [x] Document it: `/document stack & architecture`
 
 ### 2. Coding standards & tooling
 Capture conventions and checks (for example shell and script linting) from the real scaffolded project, then install them.
