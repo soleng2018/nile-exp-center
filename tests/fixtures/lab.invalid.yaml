@@ -1,0 +1,19 @@
+# Deliberately broken: every field below has one problem the validator must name.
+server_name: Lab_01
+mgmt_network:
+  subnet: 172.30.0.0/24
+clients:
+  - name: win01
+    os: windows
+    image: dockurr/windows:latest
+    mgmt_ip: 172.31.0.11
+    wifi_dongle_mac: not-a-mac
+  - name: mac01
+    os: linux
+    image: dockurr/macos:3.12
+    mgmt_ip: 172.30.0.21
+    wired_network: missing-net
+cloudflare:
+  account_id: abc
+  zone_name: nileglobalinc.com
+  api_token: super-secret-token-value

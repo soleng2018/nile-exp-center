@@ -1,0 +1,31 @@
+[project]
+name = "nile-lab"
+version = "0.1.0"
+description = "Declarative reconciler for the Nile client VM lab"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "pydantic>=2.14.2",
+    "pyyaml>=6.0.3",
+    "typer>=0.27.3",
+]
+
+[project.scripts]
+nile-lab = "nile_lab:main"
+
+[build-system]
+requires = ["uv_build>=0.13.6,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests/unit"]
+pythonpath = ["."]
+markers = [
+    "host: needs root, KVM and Docker on the lab server",
+    "cloudflare: talks to the real Cloudflare API",
+]

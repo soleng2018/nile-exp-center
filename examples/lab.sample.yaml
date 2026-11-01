@@ -1,0 +1,32 @@
+# Sample nile-lab config. No real secrets or devices: the MACs are locally
+# administered (02:...) so they never match hardware, and the token is fake.
+# PROVISIONAL schema; feature 3 (config & secrets file) owns the real one.
+# Your real file lives at /srv/nile-lab/lab.yaml, mode 0600 root:root.
+
+server_name: lab01
+
+mgmt_network:
+  subnet: 172.30.0.0/24          # one lab wide subnet; gateway defaults to .1
+
+wired_networks:
+  - name: port1
+    parent_mac: 02:00:00:00:10:01
+    dhcp: true
+
+clients:
+  - name: win01
+    os: windows
+    image: dockurr/windows:6.06
+    mgmt_ip: 172.30.0.11
+    wifi_dongle_mac: 02:00:00:00:00:01
+
+  - name: mac01
+    os: macos
+    image: dockurr/macos:3.12
+    mgmt_ip: 172.30.0.21
+    wired_network: port1
+
+cloudflare:
+  account_id: 0123456789abcdef0123456789abcdef
+  zone_name: nileglobalinc.com
+  api_token: sample-not-a-real-token

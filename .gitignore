@@ -1,0 +1,16 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Real lab config and secrets (keep these outside the repo)
+lab.yaml
+*.token
+.env
+.env.*

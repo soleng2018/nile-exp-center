@@ -1,0 +1,25 @@
+nile-lab plan · lab01 · 2 client(s)
+
+host:
+  + create   unit    nile-lab-boot.service
+  + create   unit    nile-lab-monitor.service
+  + create   unit    nile-lab-cloudflared.service
+  ~ update   link    port1  set parent link up (no IP)
+      ! no interface has MAC 02:00:00:00:10:01
+  note: docker is not installed yet (host bootstrap, feature 4)
+
+docker:
+  + create   network nile-mgmt  bridge 172.30.0.0/24 gw 172.30.0.1
+  + create   network nile-wired-port1  macvlan on ? (dhcp)
+      ! no interface has MAC 02:00:00:00:10:01
+  note: docker is not installed, so nothing could be observed here
+
+clients:
+  + create   client  win01  windows dockurr/windows:6.06, mgmt 172.30.0.11, dongle 02:00:00:00:00:01
+      ! dongle 02:00:00:00:00:01 not found
+  + create   client  mac01  macos dockurr/macos:3.12, mgmt 172.30.0.21, wired port1
+      ! wired port 02:00:00:00:10:01 not found
+
+cloudflare: skipped (offline)
+
+Plan: 7 to create, 1 to update, 0 to recreate, 0 orphaned.

@@ -1,0 +1,102 @@
+{
+  "phases": [
+    {
+      "name": "host",
+      "status": "planned",
+      "actions": [
+        {
+          "kind": "create",
+          "resource": "unit",
+          "name": "nile-lab-boot.service",
+          "detail": "",
+          "problems": []
+        },
+        {
+          "kind": "create",
+          "resource": "unit",
+          "name": "nile-lab-monitor.service",
+          "detail": "",
+          "problems": []
+        },
+        {
+          "kind": "create",
+          "resource": "unit",
+          "name": "nile-lab-cloudflared.service",
+          "detail": "",
+          "problems": []
+        },
+        {
+          "kind": "update",
+          "resource": "link",
+          "name": "port1",
+          "detail": "set parent link up (no IP)",
+          "problems": [
+            "no interface has MAC 02:00:00:00:10:01"
+          ]
+        }
+      ],
+      "notes": [
+        "docker is not installed yet (host bootstrap, feature 4)"
+      ]
+    },
+    {
+      "name": "docker",
+      "status": "planned",
+      "actions": [
+        {
+          "kind": "create",
+          "resource": "network",
+          "name": "nile-mgmt",
+          "detail": "bridge 172.30.0.0/24 gw 172.30.0.1",
+          "problems": []
+        },
+        {
+          "kind": "create",
+          "resource": "network",
+          "name": "nile-wired-port1",
+          "detail": "macvlan on ? (dhcp)",
+          "problems": [
+            "no interface has MAC 02:00:00:00:10:01"
+          ]
+        }
+      ],
+      "notes": [
+        "docker is not installed, so nothing could be observed here"
+      ]
+    },
+    {
+      "name": "clients",
+      "status": "planned",
+      "actions": [
+        {
+          "kind": "create",
+          "resource": "client",
+          "name": "win01",
+          "detail": "windows dockurr/windows:6.06, mgmt 172.30.0.11, dongle 02:00:00:00:00:01",
+          "problems": [
+            "dongle 02:00:00:00:00:01 not found"
+          ]
+        },
+        {
+          "kind": "create",
+          "resource": "client",
+          "name": "mac01",
+          "detail": "macos dockurr/macos:3.12, mgmt 172.30.0.21, wired port1",
+          "problems": [
+            "wired port 02:00:00:00:10:01 not found"
+          ]
+        }
+      ],
+      "notes": []
+    },
+    {
+      "name": "cloudflare",
+      "status": "skipped (offline)",
+      "actions": [],
+      "notes": []
+    }
+  ],
+  "foreign": [],
+  "refusals": [],
+  "changes_pending": true
+}
